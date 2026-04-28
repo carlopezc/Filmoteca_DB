@@ -45,23 +45,27 @@ import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource.films
+import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
 fun FilmListScreen(navController: NavHostController,
-                   viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+                   filmViewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+                   authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     var isActionMode by remember { mutableStateOf(false) }
     val selectedFilms = remember { mutableStateListOf<Film>() }
 
-    val films by viewModel.films.collectAsState()
+    val films by filmViewModel.films.collectAsState()
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        FilmTopAppBar(navController,
+        FilmTopAppBar(
+            navController = navController,
             principal = true,
             editar = false,
             selectedFilms = selectedFilms,
             isActionMode = isActionMode,
-            viewModel = viewModel
+            filmViewModel = filmViewModel, // Para añadir o borrar películas
+            authViewModel = authViewModel  // Para el cierre de sesión en el menú
         ) {
             isActionMode = it
         }

@@ -26,23 +26,26 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
+import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
 fun FilmDataScreen(
     navController: NavHostController,
     filmId: String,
-    viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    filmViewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle ?: return
     ShowResultToast(savedStateHandle)
 
-    val films by viewModel.films.collectAsState()
+    val films by filmViewModel.films.collectAsState()
 
     val film = remember(films) {
         films.find { it.id == filmId }
@@ -51,7 +54,12 @@ fun FilmDataScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            FilmTopAppBar(navController = navController, viewModel = viewModel)
+            FilmTopAppBar(
+                navController = navController,
+                principal = true,
+                filmViewModel = filmViewModel, // Nombre correcto para el de películas
+                authViewModel = authViewModel // Si tienes el AuthViewModel a mano
+            )
         }
     ) { innerPadding ->
         Column(

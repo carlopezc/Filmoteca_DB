@@ -6,28 +6,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmotecav2.model.Film
-import com.campusdigitalfp.filmotecav2.R
-import com.campusdigitalfp.filmotecav2.model.FilmDataSource.films
+import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
@@ -45,7 +31,8 @@ fun FilmTopAppBar(
     editar: Boolean = false,
     selectedFilms: MutableList<Film> = mutableListOf(),
     isActionMode: Boolean = false,
-    viewModel: FilmViewModel,
+    filmViewModel: FilmViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
     onActionModeChange: (Boolean) -> Unit = {}
 ) {
     TopAppBar(
@@ -61,21 +48,14 @@ fun FilmTopAppBar(
                     }
                 })
             ) {
-                Text(
-                    "Filmoteca",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Text("Filmoteca", maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         },
         navigationIcon = {
             if (!principal) {
                 IconButton(onClick = {
                     if (editar) {
-                        navController.previousBackStackEntry?.savedStateHandle?.set(
-                            "key_result",
-                            "RESULT_CANCELED"
-                        )
+                        navController.previousBackStackEntry?.savedStateHandle?.set("key_result", "RESULT_CANCELED")
                     }
                     navController.popBackStack()
                 }) {
@@ -88,7 +68,7 @@ fun FilmTopAppBar(
                 if (isActionMode) {
                     IconButton(onClick = {
                         selectedFilms.forEach { film ->
-                            viewModel.deleteFilm(film.id)
+                            filmViewModel.deleteFilm(film.id) // Usamos filmViewModel para borrar
                         }
                         selectedFilms.clear()
                         onActionModeChange(false)
@@ -96,46 +76,61 @@ fun FilmTopAppBar(
                         Icon(Icons.Filled.Delete, contentDescription = "Borrar seleccionados")
                     }
                 }
-                MenuDesplegable(navController, viewModel)
+                MenuDesplegable(navController, filmViewModel, authViewModel)
             }
         }
     )
 }
 
-
-
 @Composable
-fun MenuDesplegable(navController: NavHostController, viewModel: FilmViewModel) {
+fun MenuDesplegable(
+    navController: NavHostController,
+    filmViewModel: FilmViewModel,
+    authViewModel: AuthViewModel
+) {
     var expanded by remember { mutableStateOf(false) }
 
     IconButton(onClick = { expanded = true }) {
-        Icon(
-            imageVector = Icons.Filled.MoreVert,
-            contentDescription = "Localized description"
-        )
+        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "Menú opciones")
     }
 
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false }
     ) {
-        DropdownMenuItem(onClick = {
-            val defaultFilm = Film().apply {
-                id = ""
-                title = "Película por defecto"
-                director = "Director Desconocido"
-                image = "icono_pelicula"
-                comments = "Esta es una película de ejemplo para la aplicación."
-                format = Film.FORMAT_DVD.toString()
-                genre = Film.GENRE_ACTION.toString()
-                imdbUrl = "http://www.imdb.com"
-                year = 2024
+        DropdownMenuItem(
+            text = { Text("Añadir película") },
+            onClick = {
+                val defaultFilm = Film().apply {
+                    title = "Nueva Película"
+                    director = "Director"
+                    image = "icono_pelicula"
+                    year = 2024
+                }
+                filmViewModel.addFilm(defaultFilm)
+                expanded = false
             }
-            viewModel.addFilm(defaultFilm)
-            expanded = false
-        }, text = { Text("Añadir película") })
-        DropdownMenuItem(onClick = {
-            navController.navigate("about")
-        }, text = { Text("Acerca de") })
+        )
+
+        DropdownMenuItem(
+            text = { Text("Acerca de") },
+            onClick = {
+                expanded = false
+                navController.navigate("about")
+            }
+        )
+
+        HorizontalDivider()
+
+        DropdownMenuItem(
+            text = { Text("Cerrar Sesión") },
+            onClick = {
+                expanded = false
+                authViewModel.logout()
+                navController.navigate("login") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        )
     }
 }

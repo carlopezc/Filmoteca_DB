@@ -28,10 +28,11 @@ import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.Boton
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
+import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
-fun AboutScreen(navController: NavHostController, viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     val context = LocalContext.current
 
     Scaffold(modifier = Modifier.fillMaxSize(),
@@ -39,7 +40,7 @@ fun AboutScreen(navController: NavHostController, viewModel: FilmViewModel = and
             FilmTopAppBar(
                 navController = navController,
                 principal = false,
-                viewModel = viewModel
+                authViewModel = viewModel
             )
         }) { innerPadding ->
         Column(

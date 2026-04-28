@@ -20,16 +20,17 @@ import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.Boton
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
+import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
 fun FilmEditScreen(
     navController: NavHostController,
     filmId: String,
-    viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-) {
+    filmViewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     // Obtenemos la lista de películas de Firebase a través del ViewModel
-    val films by viewModel.films.collectAsState()
+    val films by filmViewModel.films.collectAsState()
     // Buscamos la película exacta por su ID único
     val film = films.find { it.id == filmId }
 
@@ -39,16 +40,23 @@ fun FilmEditScreen(
     }
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        FilmTopAppBar(navController, principal = false, editar = true, viewModel = viewModel)
+        FilmTopAppBar(
+            navController = navController,
+            principal = false,
+            editar = true,
+            filmViewModel = filmViewModel,
+            authViewModel = authViewModel
+        )
     }) { innerPadding ->
         // Solo cargamos el editor si la película ha sido encontrada en la lista
         film?.let {
-            EditorFilm(innerPadding, navController, it, viewModel)
+            EditorFilm(innerPadding, navController, it, filmViewModel)
         } ?: run {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
+
     }
 }
 
