@@ -9,25 +9,27 @@ import com.campusdigitalfp.filmotecav2.screens.AboutScreen
 import com.campusdigitalfp.filmotecav2.screens.FilmDataScreen
 import com.campusdigitalfp.filmotecav2.screens.FilmEditScreen
 import com.campusdigitalfp.filmotecav2.screens.FilmListScreen
+import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
+    val viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
     NavHost(navController = navController, startDestination = "list") {
         composable("list") { FilmListScreen(navController) }
-        composable("data/{filmIndex}") { backStackEntry ->
-            val filmIndex = backStackEntry.arguments?.getString("filmIndex")?.toIntOrNull()
-            filmIndex?.let {
-                FilmDataScreen(navController, filmIndex = it)
+        composable("data/{filmId}") { backStackEntry ->
+            val filmId = backStackEntry.arguments?.getString("filmId")
+            filmId?.let {
+                FilmDataScreen(navController, filmId = it, viewModel = viewModel)
             }
         }
-        composable("edit/{filmIndex}") { backStackEntry ->
-            val filmIndex = backStackEntry.arguments?.getString("filmIndex")?.toIntOrNull()
-            filmIndex?.let {
-                FilmEditScreen(navController, filmIndex = it)
+        composable("edit/{filmId}") { backStackEntry ->
+            val filmId = backStackEntry.arguments?.getString("filmId")
+            filmId?.let {
+                FilmEditScreen(navController, filmId = it, viewModel = viewModel)
             }
         }
-        composable("about") { AboutScreen(navController) }
+        composable("about") { AboutScreen(navController, viewModel = viewModel) }
     }
 }

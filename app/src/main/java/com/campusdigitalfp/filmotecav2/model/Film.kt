@@ -1,15 +1,15 @@
 package com.campusdigitalfp.filmotecav2.model
 
 data class Film(
-    var id: Int = 0,
-    var imageResId: Int = 0,
-    var title: String? = null,
-    var director: String? = null,
+    var id: String = "",  
+    var image: String = "",
+    var title: String = "",
+    var director: String = "",
     var year: Int = 0,
-    var genre: Int = 0,
-    var format: Int = 0,
-    var imdbUrl: String? = null,
-    var comments: String? = null
+    var genre: String = "",
+    var format: String = "",
+    var imdbUrl: String = "",
+    var comments: String = ""
 ) {
     override fun toString(): String {
         return title ?: "<Sin título>"

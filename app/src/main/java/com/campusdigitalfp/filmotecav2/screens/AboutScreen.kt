@@ -28,15 +28,18 @@ import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.Boton
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
+import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
-fun AboutScreen(navController: NavHostController) {
+fun AboutScreen(navController: NavHostController, viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     val context = LocalContext.current
 
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = {
             FilmTopAppBar(
-                navController = navController
+                navController = navController,
+                principal = false,
+                viewModel = viewModel
             )
         }) { innerPadding ->
         Column(

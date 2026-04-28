@@ -15,8 +15,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,44 +31,57 @@ import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
+import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
-fun FilmDataScreen(navController: NavHostController, filmIndex: Int) {
+fun FilmDataScreen(
+    navController: NavHostController,
+    filmId: String,
+    viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle ?: return
     ShowResultToast(savedStateHandle)
-    val film = FilmDataSource.films[filmIndex]
 
-    Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-        FilmTopAppBar(
-            navController = navController
-        )
-    }) { innerPadding ->
+    val films by viewModel.films.collectAsState()
+
+    val film = remember(films) {
+        films.find { it.id == filmId }
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            FilmTopAppBar(navController = navController, viewModel = viewModel)
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
-        )
-        {
-            VistaFilm(film)
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Row {
-                    Button(
-                        onClick = { navController.popBackStack("list", false) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp)
-                    ) {
-                        Text("Volver")
+        ) {
+            film?.let { películaActualizada ->
+                VistaFilmDetalle(películaActualizada)
+
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Row {
+                        Button(
+                            onClick = { navController.popBackStack("list", false) },
+                            modifier = Modifier.weight(1f).padding(2.dp)
+                        ) {
+                            Text("Volver")
+                        }
+                        Button(
+                            onClick = { navController.navigate("edit/${películaActualizada.id}") },
+                            modifier = Modifier.weight(1f).padding(2.dp)
+                        ) {
+                            Text("Editar")
+                        }
                     }
-                    Button(
-                        onClick = { navController.navigate("edit/$filmIndex") },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp)
-                    ) {
-                        Text("Editar")
-                    }
+                }
+            } ?: run {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Cargando datos actualizados...")
                 }
             }
         }
@@ -74,7 +89,7 @@ fun FilmDataScreen(navController: NavHostController, filmIndex: Int) {
 }
 
 @Composable
-fun VistaFilm(film: Film) {
+fun VistaFilmDetalle(film: Film) {
     val context = LocalContext.current
     val generoList = context.resources.getStringArray(R.array.genero_list).toList()
     val formatoList = context.resources.getStringArray(R.array.formato_list).toList()
@@ -85,7 +100,7 @@ fun VistaFilm(film: Film) {
                 modifier = Modifier
                     .padding(4.dp)
                     .size(150.dp),
-                painter = painterResource(film.imageResId),
+                painter = painterResource(getDrawableId(film.image)),
                 contentDescription = "Icono de la película"
             )
             Column {
@@ -113,7 +128,7 @@ fun VistaFilm(film: Film) {
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = formatoList[film.format] + ", " + generoList[film.genre],
+                    text = "${film.format}, ${film.genre}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

@@ -14,12 +14,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,24 +45,29 @@ import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource.films
+import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
-fun FilmListScreen(navController: NavHostController) {
+fun FilmListScreen(navController: NavHostController,
+                   viewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     var isActionMode by remember { mutableStateOf(false) }
     val selectedFilms = remember { mutableStateListOf<Film>() }
+
+    val films by viewModel.films.collectAsState()
 
     Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
         FilmTopAppBar(navController,
             principal = true,
             editar = false,
             selectedFilms = selectedFilms,
-            isActionMode = isActionMode
+            isActionMode = isActionMode,
+            viewModel = viewModel
         ) {
             isActionMode = it
         }
     }) { innerPadding ->
         FilmListContent(
-            films = films,
+            films = films.toMutableList(),
             selectedFilms = selectedFilms,
             isActionMode = isActionMode,
             navController = navController,
@@ -65,7 +78,7 @@ fun FilmListScreen(navController: NavHostController) {
 
 @Composable
 fun FilmListContent(
-    films: MutableList<Film>,
+    films: List<Film>,
     selectedFilms: MutableList<Film>,
     isActionMode: Boolean,
     navController: NavHostController,
@@ -77,7 +90,7 @@ fun FilmListContent(
             .padding(innerPadding)
             .fillMaxSize()
     ) {
-        itemsIndexed(films) { index, film ->
+        items(films) {film ->
             VistaFilm(film = film, onClick = {
                 if (isActionMode) {
                     if (selectedFilms.contains(film)) {
@@ -89,7 +102,7 @@ fun FilmListContent(
                         selectedFilms.add(film)
                     }
                 } else {
-                    navController.navigate("data/$index")
+                    navController.navigate("data/${film.id}")
                 }
             }, onLongClick = {
                 selectedFilms.add(film)
@@ -113,7 +126,7 @@ fun VistaFilm(film: Film, onClick: () -> Unit, onLongClick: () -> Unit, isSelect
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            painter = painterResource(if (isSelected) R.drawable.selected else film.imageResId),
+            painter = painterResource(if (isSelected) R.drawable.selected else getDrawableId(film.image)),
             contentDescription = "Icono",
             modifier = Modifier
                 .padding(if (isSelected) 15.dp else 0.dp)
@@ -122,13 +135,56 @@ fun VistaFilm(film: Film, onClick: () -> Unit, onLongClick: () -> Unit, isSelect
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(
-                text = film.title.toString(),
+                text = film.title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = film.director.toString(), style = MaterialTheme.typography.bodyLarge
+                text = film.director, style = MaterialTheme.typography.bodyLarge
             )
+        }
+    }
+}
+
+@Composable
+fun getDrawableId(imageName: String): Int {
+    val context = LocalContext.current
+    val resourceId = context.resources.getIdentifier(imageName, "drawable", context.packageName)
+    return if (resourceId != 0) resourceId else R.drawable.ic_launcher_background
+}
+
+@Composable
+fun FilmItem(film: Film) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagen de la película
+            Image(
+                painter = painterResource(id = getDrawableId(film.image)),
+                contentDescription = film.title,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Detalles del texto
+            Column {
+                Text(text = film.title, style = MaterialTheme.typography.titleLarge)
+                Text(text = "${film.director} (${film.year})", style = MaterialTheme.typography.bodyMedium)
+                Text(text = film.genre.toString(), style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+            }
         }
     }
 }
