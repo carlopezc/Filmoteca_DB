@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "634439523252",
+    "project_id": "filmotecadb",
+    "storage_bucket": "filmotecadb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634439523252:android:04e2453288eeb71ccaf0e1",
+        "android_client_info": {
+          "package_name": "com.campusdigitalfp.filmotecav2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFZ2TtTvLAsEeLgru1Z38gu4o-4yBWnhw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
