@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">FilmotecaV2</string>
+    <string name="creado_por">Created by Alejandro Torres</string>
+    <string name="avatar_del_creador">Avatar</string>
+    <string name="funcionalidad_no_implementada">Functionality not implemented</string>
+    <string name="ir_al_sitio_web">Go to the website</string>
+    <string name="volver">Back</string>
+    <string name="obtener_soporte">Get support</string>
+    <string name="incidencia_con_filmoteca">Incidencia con Filmoteca</string>
+</resources>
