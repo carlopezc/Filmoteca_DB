@@ -77,7 +77,7 @@ fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = and
             Spacer(modifier = Modifier.height(8.dp))
             
             // Reproductor de Vídeo (How-to)
-            VideoItem(videoUrl = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4")
+            VideoItem(videoUrl = "http://10.0.2.2/guia.mp4")
 
             Row(
                 modifier = Modifier
