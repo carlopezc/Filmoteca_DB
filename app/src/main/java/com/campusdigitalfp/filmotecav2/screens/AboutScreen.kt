@@ -76,7 +76,6 @@ fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = and
             Text(text = "Guía de uso (How-to)", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Reproductor de Vídeo (How-to)
             VideoItem(videoUrl = "http://10.0.2.2/guia.mp4")
 
             Row(
@@ -119,7 +118,7 @@ fun VideoItem(videoUrl: String) {
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(Uri.parse(videoUrl)))
             prepare()
-            playWhenReady = false // No auto-play por defecto
+            playWhenReady = false
         }
     }
 

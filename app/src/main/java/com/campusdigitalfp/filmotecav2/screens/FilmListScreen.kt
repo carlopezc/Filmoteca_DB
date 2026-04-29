@@ -65,8 +65,8 @@ fun FilmListScreen(navController: NavHostController,
             editar = false,
             selectedFilms = selectedFilms,
             isActionMode = isActionMode,
-            filmViewModel = filmViewModel, // Para añadir o borrar películas
-            authViewModel = authViewModel  // Para el cierre de sesión en el menú
+            filmViewModel = filmViewModel,
+            authViewModel = authViewModel
         ) {
             isActionMode = it
         }
@@ -182,7 +182,6 @@ fun FilmItem(film: Film) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen de la película
             Image(
                 painter = painterResource(id = getDrawableId(film.image)),
                 contentDescription = film.title,
@@ -194,7 +193,6 @@ fun FilmItem(film: Film) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Detalles del texto
             Column {
                 Text(text = film.title, style = MaterialTheme.typography.titleLarge)
                 Text(text = "${film.director} (${film.year})", style = MaterialTheme.typography.bodyMedium)

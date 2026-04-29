@@ -68,7 +68,7 @@ fun FilmTopAppBar(
                 if (isActionMode) {
                     IconButton(onClick = {
                         selectedFilms.forEach { film ->
-                            filmViewModel.deleteFilm(film.id) // Usamos filmViewModel para borrar
+                            filmViewModel.deleteFilm(film.id)
                         }
                         selectedFilms.clear()
                         onActionModeChange(false)

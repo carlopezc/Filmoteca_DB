@@ -18,7 +18,6 @@ import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    // Creamos las instancias de los ViewModels que compartiremos en toda la navegación
     val authViewModel: AuthViewModel = viewModel()
     val filmViewModel: FilmViewModel = viewModel()
 
@@ -45,7 +44,6 @@ fun Navigation() {
                 LaunchedEffect(Unit) {
                     filmViewModel.refresh()
                 }
-                // CORREGIDO: Pasamos ambos ViewModels
                 FilmListScreen(navController, filmViewModel, authViewModel)
             }
         }
@@ -56,7 +54,6 @@ fun Navigation() {
                 LaunchedEffect(Unit) { navController.navigate("login") }
             } else {
                 id?.let {
-                    // CORREGIDO: Pasamos ambos ViewModels
                     FilmDataScreen(navController, it, filmViewModel, authViewModel)
                 }
             }
@@ -68,14 +65,12 @@ fun Navigation() {
                 LaunchedEffect(Unit) { navController.navigate("login") }
             } else {
                 id?.let {
-                    // CORREGIDO: Pasamos ambos ViewModels
                     FilmEditScreen(navController, it, filmViewModel, authViewModel)
                 }
             }
         }
 
         composable("about") {
-            // CORREGIDO: Pasamos el AuthViewModel para que la TopAppBar pueda cerrar sesión
             AboutScreen(navController, authViewModel)
         }
     }

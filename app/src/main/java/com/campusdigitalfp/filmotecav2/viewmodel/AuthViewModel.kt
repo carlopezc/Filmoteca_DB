@@ -18,9 +18,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
-    // Login
     fun loginUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        // Si están vacíos, devolvemos el error antes de llamar a Firebase
         if (email.isBlank() || password.isBlank()) {
             onResult(false, "El correo y la contraseña no pueden estar vacíos.")
             return

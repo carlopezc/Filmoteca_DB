@@ -45,9 +45,7 @@ fun FilmEditScreen(
     filmId: String,
     filmViewModel: FilmViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
-    // Obtenemos la lista de películas de Firebase a través del ViewModel
     val films by filmViewModel.films.collectAsState()
-    // Buscamos la película exacta por su ID único
     val film = films.find { it.id == filmId }
 
     BackHandler {
@@ -64,7 +62,6 @@ fun FilmEditScreen(
             authViewModel = authViewModel
         )
     }) { innerPadding ->
-        // Solo cargamos el editor si la película ha sido encontrada en la lista
         film?.let {
             EditorFilm(innerPadding, navController, it, filmViewModel)
         } ?: run {
@@ -84,7 +81,6 @@ fun EditorFilm(
     viewModel: FilmViewModel
 ) {
     val context = LocalContext.current
-    // Estados para los campos de texto
     var titulo by remember { mutableStateOf(film.title) }
     var director by remember { mutableStateOf(film.director) }
     var anyo by remember { mutableStateOf(film.year.toString()) }
@@ -151,14 +147,12 @@ fun EditorFilm(
         }
     }
 
-    // Estados para los menús desplegables
     var expandedGenero by remember { mutableStateOf(false) }
     var expandedFormato by remember { mutableStateOf(false) }
 
     val generoList = context.resources.getStringArray(R.array.genero_list).toList()
     val formatoList = context.resources.getStringArray(R.array.formato_list).toList()
 
-    // Buscamos los índices actuales basándonos en el String que viene de Firebase
     var generoIdx by remember {
         mutableIntStateOf(generoList.indexOf(film.genre).coerceAtLeast(0))
     }
@@ -234,7 +228,6 @@ fun EditorFilm(
                 )
                 TextField(value = url, onValueChange = { url = it }, label = { Text("Enlace a IMDB") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-                // Selector de Género
                 Column {
                     Text("Género: ${generoList[generoIdx]}",
                         modifier = Modifier.padding(16.dp).clickable { expandedGenero = true })
@@ -248,7 +241,6 @@ fun EditorFilm(
                     }
                 }
 
-                // Selector de Formato
                 Column {
                     Text("Formato: ${formatoList[formatoIdx]}",
                         modifier = Modifier.padding(16.dp).clickable { expandedFormato = true })
@@ -314,7 +306,6 @@ fun guardarCambios(
     imagen: String,
     viewModel: FilmViewModel
 ) {
-    // Creamos una copia con los nuevos datos, manteniendo el mismo ID de Firebase
     val filmActualizada = film.copy(
         title = titulo,
         director = director,
@@ -326,7 +317,6 @@ fun guardarCambios(
         image = imagen
     )
 
-    // Subimos la actualización a Firestore
     viewModel.addFilm(filmActualizada)
 
     navController.previousBackStackEntry?.savedStateHandle?.set("key_result", "RESULT_OK")

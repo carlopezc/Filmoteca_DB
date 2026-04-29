@@ -58,8 +58,8 @@ fun FilmDataScreen(
             FilmTopAppBar(
                 navController = navController,
                 principal = true,
-                filmViewModel = filmViewModel, // Nombre correcto para el de películas
-                authViewModel = authViewModel // Si tienes el AuthViewModel a mano
+                filmViewModel = filmViewModel,
+                authViewModel = authViewModel
             )
         }
     ) { innerPadding ->
