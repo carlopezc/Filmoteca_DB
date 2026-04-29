@@ -17,8 +17,8 @@ import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
 
 @Composable
-fun Boton(onClick: () -> Unit, text: String, modifier: Modifier = Modifier){
-    Button(onClick = onClick, modifier = modifier) {
+fun Boton(onClick: () -> Unit, text: String, modifier: Modifier = Modifier, enabled: Boolean = true){
+    Button(onClick = onClick, modifier = modifier, enabled = enabled) {
         Text(text)
     }
 }

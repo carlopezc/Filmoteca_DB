@@ -31,6 +31,7 @@ import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
+import coil.compose.AsyncImage
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
 import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
@@ -104,13 +105,23 @@ fun VistaFilmDetalle(film: Film) {
 
     Column(modifier = Modifier.padding(8.dp)) {
         Row(modifier = Modifier.padding(8.dp)) {
-            Image(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(150.dp),
-                painter = painterResource(getDrawableId(film.image)),
-                contentDescription = "Icono de la película"
-            )
+            if (film.image.startsWith("http")) {
+                AsyncImage(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(150.dp),
+                    model = film.image,
+                    contentDescription = "Icono de la película"
+                )
+            } else {
+                Image(
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(150.dp),
+                    painter = painterResource(getDrawableId(film.image)),
+                    contentDescription = "Icono de la película"
+                )
+            }
             Column {
                 Text(
                     text = film.title.toString(),

@@ -30,6 +30,14 @@ import com.campusdigitalfp.filmotecav2.common.Boton
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
 import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
+import androidx.compose.runtime.remember
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.compose.runtime.DisposableEffect
 
 @Composable
 fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
@@ -47,9 +55,10 @@ fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = and
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.Center, // Centrar verticalmente
-            horizontalAlignment = Alignment.CenterHorizontally // Centrar horizontalmente
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(R.string.creado_por),
                 style = MaterialTheme.typography.titleLarge
@@ -62,6 +71,14 @@ fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = and
                 contentDescription = stringResource(R.string.avatar_del_creador),
                 Modifier.height(100.dp)
             )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Guía de uso (How-to)", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Reproductor de Vídeo (How-to)
+            VideoItem(videoUrl = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4")
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,6 +112,38 @@ fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = and
     }
 }
 
+@Composable
+fun VideoItem(videoUrl: String) {
+    val context = LocalContext.current
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(MediaItem.fromUri(Uri.parse(videoUrl)))
+            prepare()
+            playWhenReady = false // No auto-play por defecto
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { exoPlayer.release() }
+    }
+
+    AndroidView(
+        factory = { ctx ->
+            PlayerView(ctx).apply {
+                player = exoPlayer
+                useController = true
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .padding(8.dp)
+    )
+}
 
 fun abrirPaginaWeb(url: String, context: Context) {
     val intent = Intent(Intent.ACTION_VIEW).apply {

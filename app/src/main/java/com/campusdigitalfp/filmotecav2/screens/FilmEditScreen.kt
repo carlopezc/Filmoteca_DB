@@ -22,6 +22,22 @@ import com.campusdigitalfp.filmotecav2.common.Boton
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
 import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmotecav2.viewmodel.FilmViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import coil.compose.AsyncImage
+import com.campusdigitalfp.filmotecav2.network.saveImageToAppFolder
+import com.campusdigitalfp.filmotecav2.network.uploadImageToServer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun FilmEditScreen(
@@ -67,19 +83,78 @@ fun EditorFilm(
     film: Film,
     viewModel: FilmViewModel
 ) {
+    val context = LocalContext.current
     // Estados para los campos de texto
     var titulo by remember { mutableStateOf(film.title) }
     var director by remember { mutableStateOf(film.director) }
     var anyo by remember { mutableStateOf(film.year.toString()) }
     var url by remember { mutableStateOf(film.imdbUrl) }
     var comentarios by remember { mutableStateOf(film.comments) }
-    val imagen = film.image
+    var imagen by remember { mutableStateOf(film.image) }
+
+    val scope = rememberCoroutineScope()
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    var isUploading by remember { mutableStateOf(false) }
+
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasCameraPermission = isGranted
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && imageUri != null) {
+            saveImageToAppFolder(context, imageUri!!)?.let { savedUri ->
+                isUploading = true
+                scope.launch(Dispatchers.IO) {
+                    val serverUrl = uploadImageToServer(savedUri, context)
+                    if (serverUrl != null) {
+                        imagen = serverUrl.toString()
+                    }
+                    isUploading = false
+                }
+            }
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            isUploading = true
+            scope.launch(Dispatchers.IO) {
+                val serverUrl = uploadImageToServer(it, context)
+                if (serverUrl != null) {
+                    imagen = serverUrl.toString()
+                }
+                isUploading = false
+            }
+        }
+    }
+
+    val createImageFile: () -> Uri? = {
+        try {
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            val file = File.createTempFile("IMG_${timeStamp}_", ".jpg", storageDir)
+            FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     // Estados para los menús desplegables
     var expandedGenero by remember { mutableStateOf(false) }
     var expandedFormato by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
     val generoList = context.resources.getStringArray(R.array.genero_list).toList()
     val formatoList = context.resources.getStringArray(R.array.formato_list).toList()
 
@@ -102,17 +177,45 @@ fun EditorFilm(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(getDrawableId(imagen)),
-                contentDescription = "Icono película",
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(70.dp),
-            )
-            Button(onClick = { /* Capturar foto - No implementado */ }, modifier = Modifier.weight(1f).padding(1.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                if (imagen.startsWith("http")) {
+                    AsyncImage(
+                        model = imagen,
+                        contentDescription = "Icono película",
+                        modifier = Modifier.padding(4.dp).size(70.dp)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(getDrawableId(imagen)),
+                        contentDescription = "Icono película",
+                        modifier = Modifier.padding(4.dp).size(70.dp),
+                    )
+                }
+                if (isUploading) {
+                    CircularProgressIndicator(modifier = Modifier.size(40.dp))
+                }
+            }
+            Button(
+                onClick = {
+                    if (!hasCameraPermission) {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    } else {
+                        createImageFile()?.let { uri ->
+                            imageUri = uri
+                            cameraLauncher.launch(uri)
+                        }
+                    }
+                },
+                modifier = Modifier.weight(1f).padding(1.dp),
+                enabled = !isUploading
+            ) {
                 Text("Capturar")
             }
-            Button(onClick = { /* Seleccionar imagen - No implementado */ }, modifier = Modifier.weight(1f).padding(1.dp)) {
+            Button(
+                onClick = { galleryLauncher.launch("image/*") },
+                modifier = Modifier.weight(1f).padding(1.dp),
+                enabled = !isUploading
+            ) {
                 Text("Galería")
             }
         }
@@ -183,9 +286,10 @@ fun EditorFilm(
                         generoSeleccionado,
                         formatoSeleccionado,
                         comentarios,
+                        imagen,
                         viewModel
                     )
-                }, text = "Guardar", modifier = Modifier.weight(1f).padding(1.dp)
+                }, text = "Guardar", modifier = Modifier.weight(1f).padding(1.dp), enabled = !isUploading
             )
             Boton(
                 onClick = {
@@ -207,6 +311,7 @@ fun guardarCambios(
     genero: String,
     formato: String,
     comentarios: String,
+    imagen: String,
     viewModel: FilmViewModel
 ) {
     // Creamos una copia con los nuevos datos, manteniendo el mismo ID de Firebase
@@ -217,7 +322,8 @@ fun guardarCambios(
         imdbUrl = url,
         genre = genero,
         format = formato,
-        comments = comentarios
+        comments = comentarios,
+        image = imagen
     )
 
     // Subimos la actualización a Firestore

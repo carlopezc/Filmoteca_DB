@@ -43,6 +43,7 @@ import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
+import coil.compose.AsyncImage
 import com.campusdigitalfp.filmotecav2.common.FilmTopAppBar
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource.films
 import com.campusdigitalfp.filmotecav2.viewmodel.AuthViewModel
@@ -123,19 +124,29 @@ fun FilmListContent(
 fun VistaFilm(film: Film, onClick: () -> Unit, onLongClick: () -> Unit, isSelected: Boolean) {
     Row(
         modifier = Modifier
-            .padding(8.dp)
             .fillMaxWidth()
+            .padding(8.dp)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color.Transparent),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(if (isSelected) R.drawable.selected else getDrawableId(film.image)),
-            contentDescription = "Icono",
-            modifier = Modifier
-                .padding(if (isSelected) 15.dp else 0.dp)
-                .size(if (isSelected) 50.dp else 80.dp)
-        )
+        if (film.image.startsWith("http") && !isSelected) {
+            AsyncImage(
+                model = film.image,
+                contentDescription = "Icono",
+                modifier = Modifier
+                    .padding(0.dp)
+                    .size(80.dp)
+            )
+        } else {
+            Image(
+                painter = painterResource(if (isSelected) R.drawable.selected else getDrawableId(film.image)),
+                contentDescription = "Icono",
+                modifier = Modifier
+                    .padding(if (isSelected) 15.dp else 0.dp)
+                    .size(if (isSelected) 50.dp else 80.dp)
+            )
+        }
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(
