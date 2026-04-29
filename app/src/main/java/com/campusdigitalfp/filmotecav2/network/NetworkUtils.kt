@@ -47,7 +47,7 @@ suspend fun uploadImageToServer(imageUri: Uri, context: Context): Uri? {
         val multipartBody = MultipartBody.Part.createFormData("image", file.name, requestBody)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://192.168.0.31/") // Tu IP local detectada
+            .baseUrl("http://10.0.2.2/") // IP especial para acceder al host desde el emulador
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
