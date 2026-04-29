@@ -12,7 +12,20 @@
           "package_name": "com.campusdigitalfp.filmotecav2"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "634439523252-2fbj1m3usgd9j6r3a0q0a9f63k679rem.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.campusdigitalfp.filmotecav2",
+            "certificate_hash": "56e92016ff3dd65f2dff95469e197d01bd2690c5"
+          }
+        },
+        {
+          "client_id": "634439523252-dihscseue02n2i6ke3t59r279s0eh1ae.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAFZ2TtTvLAsEeLgru1Z38gu4o-4yBWnhw"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "634439523252-dihscseue02n2i6ke3t59r279s0eh1ae.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

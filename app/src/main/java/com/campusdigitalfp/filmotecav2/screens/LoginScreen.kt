@@ -47,6 +47,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.model.FilmDataSource
 import com.campusdigitalfp.filmotecav2.R
@@ -61,6 +67,39 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val googleSignInClient = remember {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(context.getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        GoogleSignIn.getClient(context, gso)
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                account?.idToken?.let { idToken ->
+                    isLoading = true
+                    viewModel.signInWithGoogle(idToken) { success, error ->
+                        isLoading = false
+                        if (success) {
+                            navController.navigate("list") { popUpTo("login") { inclusive = true } }
+                        } else {
+                            errorMessage = error
+                        }
+                    }
+                }
+            } catch (e: ApiException) {
+                errorMessage = "Error de Google: ${e.message}"
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -108,6 +147,18 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = vie
             enabled = !isLoading
         ) {
             Text("Entrar")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                launcher.launch(googleSignInClient.signInIntent)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading
+        ) {
+            Text("Iniciar sesión con Google")
         }
 
         TextButton(onClick = {

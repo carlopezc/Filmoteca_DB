@@ -41,6 +41,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
     }
 
+    fun signInWithGoogle(idToken: String, onResult: (Boolean, String?) -> Unit) {
+        val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) onResult(true, null)
+                else onResult(false, translateErrorFirebase(task.exception))
+            }
+    }
+
     fun logout() {
         auth.signOut()
     }
