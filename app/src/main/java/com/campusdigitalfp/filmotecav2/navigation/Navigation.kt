@@ -42,6 +42,9 @@ fun Navigation() {
                     }
                 }
             } else {
+                LaunchedEffect(Unit) {
+                    filmViewModel.refresh()
+                }
                 // CORREGIDO: Pasamos ambos ViewModels
                 FilmListScreen(navController, filmViewModel, authViewModel)
             }

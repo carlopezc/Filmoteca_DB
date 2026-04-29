@@ -22,6 +22,15 @@ class FilmViewModel : ViewModel()   {
             _films.value = updatedFilms
         }
     }
+
+    fun refresh() {
+        listenToFilms()
+    }
+
+    fun clear() {
+        repository.clearListener()
+        _films.value = emptyList()
+    }
     fun addFilm(film: Film) {
         viewModelScope.launch {
             repository.addFilm(film)

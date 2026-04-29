@@ -126,6 +126,7 @@ fun MenuDesplegable(
             text = { Text("Cerrar Sesión") },
             onClick = {
                 expanded = false
+                filmViewModel.clear()
                 authViewModel.logout()
                 navController.navigate("login") {
                     popUpTo(0) { inclusive = true }
