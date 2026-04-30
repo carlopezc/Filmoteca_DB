@@ -76,7 +76,7 @@ fun AboutScreen(navController: NavHostController, viewModel: AuthViewModel = and
             Text(text = "Guía de uso (How-to)", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             
-            VideoItem(videoUrl = "http://10.0.2.2/guia.mp4")
+            VideoItem(videoUrl = "android.resource://${LocalContext.current.packageName}/${R.raw.guia}")
 
             Row(
                 modifier = Modifier

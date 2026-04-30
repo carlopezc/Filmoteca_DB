@@ -1,6 +1,7 @@
 package com.campusdigitalfp.filmotecav2.viewmodel
 
 import androidx.lifecycle.ViewModel
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import com.campusdigitalfp.filmotecav2.model.Film
 import com.campusdigitalfp.filmotecav2.repository.FilmRepository
@@ -40,5 +41,9 @@ class FilmViewModel : ViewModel()   {
         viewModelScope.launch {
             repository.deleteFilm(filmId)
         }
+    }
+
+    suspend fun uploadImage(uri: Uri): String? {
+        return repository.uploadImage(uri)
     }
 }

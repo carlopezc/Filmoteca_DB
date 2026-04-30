@@ -6,6 +6,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.firestore.ListenerRegistration
+import android.net.Uri
+import com.campusdigitalfp.filmotecav2.network.ApiService
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 
 class FilmRepository {
     private val db = FirebaseFirestore.getInstance()
@@ -67,5 +76,29 @@ class FilmRepository {
     fun clearListener() {
         snapshotListener?.remove()
         snapshotListener = null
+    }
+
+    suspend fun uploadImage(imageUri: Uri): String? {
+        val file = File(imageUri.path ?: return null)
+        return try {
+            val requestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val multipartBody = MultipartBody.Part.createFormData("image", file.name, requestBody)
+
+            val retrofit = Retrofit.Builder()
+                .baseUrl("http://10.0.2.2/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val apiService = retrofit.create(ApiService::class.java)
+            val response = apiService.uploadImage(multipartBody)
+
+            if (response.isSuccessful) {
+                val jsonResponse = response.body()?.string()
+                val jsonObject = JSONObject(jsonResponse ?: "")
+                jsonObject.optString("url", null)
+            } else null
+        } catch (e: Exception) {
+            null
+        }
     }
 }

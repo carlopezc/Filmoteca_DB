@@ -32,7 +32,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.campusdigitalfp.filmotecav2.network.saveImageToAppFolder
-import com.campusdigitalfp.filmotecav2.network.uploadImageToServer
+import com.campusdigitalfp.filmotecav2.network.saveImageToAppFolder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
@@ -103,7 +103,6 @@ fun EditorFilm(
     ) { isGranted ->
         hasCameraPermission = isGranted
     }
-
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
@@ -111,7 +110,7 @@ fun EditorFilm(
             saveImageToAppFolder(context, imageUri!!)?.let { savedUri ->
                 isUploading = true
                 scope.launch(Dispatchers.IO) {
-                    val serverUrl = uploadImageToServer(savedUri, context)
+                    val serverUrl = viewModel.uploadImage(savedUri)
                     if (serverUrl != null) {
                         imagen = serverUrl.toString()
                     }
@@ -127,7 +126,7 @@ fun EditorFilm(
         uri?.let {
             isUploading = true
             scope.launch(Dispatchers.IO) {
-                val serverUrl = uploadImageToServer(it, context)
+                val serverUrl = viewModel.uploadImage(it)
                 if (serverUrl != null) {
                     imagen = serverUrl.toString()
                 }
